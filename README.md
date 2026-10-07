@@ -2,6 +2,8 @@
 
 교육생이 면접 피드백과 준비 팁을 한 곳에 모으는 작은 공유 공간입니다. 한 시즌에는 **면접 정보**와 **잡담** 두 목록이 있습니다. 글은 최신순으로 보이며, 기존 글은 일반 사용자가 수정하거나 삭제할 수 없습니다.
 
+운영 사이트: [skala-interview.vercel.app](https://skala-interview.vercel.app/)
+
 ## 로컬 실행
 
 외부 SaaS 계정 없이 Docker의 PostgreSQL로 실행할 수 있습니다. Node.js 20 이상, Python 3.11 이상, Docker Compose가 필요합니다.
@@ -86,7 +88,7 @@ npm run dev
 3. Production으로 배포합니다. 배포 주소를 처음 알게 된 경우 `APP_ORIGIN`을 그 주소로 설정한 뒤 **다시 배포**합니다. 환경변수 변경은 이미 만들어진 배포에 소급 적용되지 않습니다. Preview 배포에서 로그인을 시험할 때는 해당 Preview 주소에 맞는 `APP_ORIGIN`이 필요합니다. [Vercel 환경변수 안내](https://vercel.com/docs/environment-variables)
 4. 배포 후 로그인, 글 작성, 검색, 로그아웃을 확인합니다. 비로그인 상태의 `/api/notes`가 401을 돌려주는 것도 확인합니다. 실패하면 Vercel Functions 로그와 Neon 연결 상태를 확인합니다.
 
-Python 함수는 `api/index.py`에서 시작하고 실제 라우트는 `api/auth.py`, `api/notes.py`에 있습니다. `api/db.py`는 Neon pooled 연결을 짧게 열고 닫습니다. 정적 화면 코드는 `src/components/`에 나뉘어 있습니다. 실제 Neon/Vercel 배포는 계정 연결 후 확인해야 합니다.
+Python 함수는 `api/index.py`에서 시작하고 실제 라우트는 `api/auth.py`, `api/notes.py`에 있습니다. `api/db.py`는 Neon pooled 연결을 짧게 열고 닫습니다. 정적 화면 코드는 `src/components/`에 나뉘어 있습니다. 현재 운영 구성은 Vercel의 `skalalal/skala-interview` 프로젝트와 Neon의 `skala-interview` 프로젝트(`withered-fog-71863334`)입니다. 운영 비밀값은 Vercel 환경변수에만 보관합니다.
 
 ## 관리자 작업
 
