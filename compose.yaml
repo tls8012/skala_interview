@@ -1,0 +1,23 @@
+name: interview-notes
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: interview_notes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: local-admin-only
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/migrations/001_initial.sql:/docker-entrypoint-initdb.d/001_initial.sql:ro
+      - ./db/local/002_role.sql:/docker-entrypoint-initdb.d/002_role.sql:ro
+      - ./db/permissions.sql:/docker-entrypoint-initdb.d/003_permissions.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d interview_notes"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  postgres_data:
