@@ -47,7 +47,7 @@ npm run dev
 
 ## Neon 연결
 
-이 프로젝트의 운영 DB는 **Neon PostgreSQL**을 기준으로 합니다. 앱은 제한된 `app_user` 계정의 **pooled 연결**을 쓰고, 스키마 변경과 백업은 관리자 계정의 **direct 연결**을 씁니다. Neon의 Connection Details에서 두 연결의 차이를 확인할 수 있습니다. pooled 호스트에는 보통 `-pooler`가 붙습니다. [Neon 연결 풀 안내](https://neon.com/docs/connect/connection-pooling)
+이 프로젝트의 운영 DB는 **Neon PostgreSQL**을 기준으로 합니다. 앱은 제한된 `notes_writer` 계정의 **pooled 연결**을 쓰고, 스키마 변경과 백업은 관리자 계정의 **direct 연결**을 씁니다. Neon의 Connection Details에서 두 연결의 차이를 확인할 수 있습니다. pooled 호스트에는 보통 `-pooler`가 붙습니다. [Neon 연결 풀 안내](https://neon.com/docs/connect/connection-pooling)
 
 1. [Neon Console](https://console.neon.tech/)에서 프로젝트와 DB를 만듭니다. Vercel 함수와 가까운 지역을 선택합니다.
 2. Connection Details에서 기본 관리자 역할의 **direct connection string**을 복사하여 로컬 터미널의 `ADMIN_DATABASE_URL`로만 사용합니다. 주소에 `sslmode=require`를 유지합니다.
@@ -60,7 +60,7 @@ npm run dev
 4. Neon SQL Editor에서 다음 SQL을 실행해 앱 전용 역할을 만듭니다. `긴_임의_비밀번호`는 실제 무작위 비밀번호로 바꿉니다. 이 역할에 관리자 역할을 부여하지 않습니다.
 
    ```sql
-   CREATE ROLE app_user LOGIN PASSWORD '긴_임의_비밀번호';
+   CREATE ROLE notes_writer LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD '긴_임의_비밀번호';
    ```
 
 5. 관리자 연결로 제한 권한을 적용합니다.
@@ -69,7 +69,7 @@ npm run dev
    psql "$ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -f db/permissions.sql
    ```
 
-6. Connection Details에서 역할을 `app_user`로 고르고 **Pooled connection**을 켜서 앱용 URL을 얻습니다. 이것이 Vercel의 `DATABASE_URL`입니다. `app_user`로 접속해 `SELECT`와 `INSERT`는 되고 `UPDATE`와 `DELETE` 권한은 없는지 확인합니다. [Neon 역할 안내](https://neon.com/docs/manage/roles)
+6. Connection Details에서 역할을 `notes_writer`로 고르고 **Pooled connection**을 켜서 앱용 URL을 얻습니다. 이것이 Vercel의 `DATABASE_URL`입니다. `notes_writer`로 접속해 `SELECT`와 `INSERT`는 되고 `UPDATE`와 `DELETE` 권한은 없는지 확인합니다. [Neon 역할 안내](https://neon.com/docs/manage/roles)
 
 `ADMIN_DATABASE_URL`은 로컬 관리자 작업에만 사용합니다. **Vercel 환경변수에 넣거나 Git에 저장하지 마세요.**
 
@@ -80,7 +80,7 @@ npm run dev
 
    | 이름 | 값 |
    |---|---|
-   | `DATABASE_URL` | 위에서 만든 `app_user`의 Neon **pooled** URL |
+   | `DATABASE_URL` | 위에서 만든 `notes_writer`의 Neon **pooled** URL |
    | `APP_PASSWORD_HASH` | `python3 scripts/hash_password.py` 출력 |
    | `SESSION_SECRET` | 길고 무작위인 별도 문자열 |
    | `APP_ORIGIN` | 실제 사이트의 정확한 HTTPS origin, 예: `https://example.vercel.app` |
@@ -88,7 +88,7 @@ npm run dev
 3. Production으로 배포합니다. 배포 주소를 처음 알게 된 경우 `APP_ORIGIN`을 그 주소로 설정한 뒤 **다시 배포**합니다. 환경변수 변경은 이미 만들어진 배포에 소급 적용되지 않습니다. Preview 배포에서 로그인을 시험할 때는 해당 Preview 주소에 맞는 `APP_ORIGIN`이 필요합니다. [Vercel 환경변수 안내](https://vercel.com/docs/environment-variables)
 4. 배포 후 로그인, 글 작성, 검색, 로그아웃을 확인합니다. 비로그인 상태의 `/api/notes`가 401을 돌려주는 것도 확인합니다. 실패하면 Vercel Functions 로그와 Neon 연결 상태를 확인합니다.
 
-Python 함수는 `api/index.py`에서 시작하고 실제 라우트는 `api/auth.py`, `api/notes.py`에 있습니다. `api/db.py`는 Neon pooled 연결을 짧게 열고 닫습니다. 정적 화면 코드는 `src/components/`에 나뉘어 있습니다. 현재 운영 구성은 Vercel의 `skalalal/skala-interview` 프로젝트와 Neon의 `skala-interview` 프로젝트(`withered-fog-71863334`)입니다. 운영 비밀값은 Vercel 환경변수에만 보관합니다.
+Python 함수는 `api/index.py`에서 시작하고 실제 라우트는 `api/auth.py`, `api/notes.py`에 있습니다. `api/db.py`는 Neon pooled 연결을 짧게 열고 닫습니다. 정적 화면 코드는 `src/components/`에 나뉘어 있습니다. 현재 운영 구성은 Vercel의 `skalalal/skala-interview` 프로젝트와 Neon의 `skala-interview` 프로젝트(`withered-fog-71863334`)입니다. 운영 앱 역할은 `notes_writer`이며, 운영 비밀값은 Vercel 환경변수에만 보관합니다.
 
 ## 관리자 작업
 
